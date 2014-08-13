@@ -1,6 +1,6 @@
 
 from phue import Bridge
-from flask import Flask, request, abort
+from flask import Flask, request, abort, render_template
 
 from utils import choose_color_hue, guess_color_from_hue
 
@@ -136,6 +136,11 @@ def guess_color(hue):
     color = guess_color_from_hue(hue)
 
     return 'Hue "{}" is closest to "{}"'.format(hue, color)
+
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 
 if __name__ == '__main__':

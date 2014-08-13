@@ -1,0 +1,14 @@
+<h1>Hue Server</h1>
+<h2>About</h2>
+<p>It's an api for interacting with our very own Philips Hue bulbs</p>
+<h2>Usage</h2>
+<p>curl or just go to these urls in a browser to change the bulb!</p>
+<ul>
+	<li><pre>/hue/[value]</pre> where [value] is between 0 and 65535 (2^16 - 1) to change the color</li>
+	<li><pre>/bri/[value]</pre> where [value] is between 0 and 255 (2^8 - 1) to change the brighness</li>
+	<li><pre>/sat/[value]</pre> where [value] is between 0 and 255 (2^8 - 1) to change the saturation</li>
+	<li><pre>curl -H "Content-Type: application/json" -d '{"sat":[sat_value], "bri":[bri_value],"hue":[hue_value]}' http://[local_ip]:[port]/set
+	</pre> on the command line to change all at once</li>
+	<li><pre>/color/[color_description]</pre> where [color_description] is a color with maybe some adjectives and stuff if you want.</li>
+	<li><pre>/guess-color/[hue_value]</pre> to see what known color is closest to [hue_value]</li>
+</ul>
