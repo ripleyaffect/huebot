@@ -8,7 +8,7 @@ from utils import choose_color_hue, guess_color_from_hue
 app = Flask(__name__)
 
 
-BRIDGE_IP = ''  # Your bridge IP
+BRIDGE_IP = '192.168.1.101'  # Your bridge IP
 LIGHT_IDS = [1, 2, 3]  # The IDs of the lights you want to control
 
 
@@ -16,48 +16,23 @@ bridge = Bridge(BRIDGE_IP)
 bridge.connect()
 
 
-@app.route('/hue/<hue>')
-def set_hue(hue=0):
-    try:
-        hue = int(hue)
-    except ValueError:
-        return '{} is not a valid number in range 0 to 65535.'.format(hue)
-    hue = min(2**16 - 1, hue)
-    hue = hue if hue > 0 else 0
-    bridge.set_light(LIGHT_IDS, 'hue', hue)
-    return "Setting hue to {}".format(hue)
-
-
-@app.route('/bri/<bri>')
-def set_brighness(bri=0):
-    try:
-        bri = int(bri)
-    except ValueError:
-        return '{} is not a valid number in range 0 to 255.'.format(bri)
-    bri = min(255, bri)
-    bri = bri if bri > 0 else 0
-    bridge.set_light(LIGHT_IDS, 'bri', bri)
-    return "Setting brightness to {}".format(bri)
-
-
-@app.route('/sat/<sat>')
-def set_saturation(sat=0):
-    try:
-        sat = int(sat)
-    except ValueError:
-        return '{} is not a valid number in the range 0 to 255.'.format(sat)
-    sat = min(255, sat)
-    sat = sat if sat > 0 else 0
-    bridge.set_light(LIGHT_IDS, 'sat', int(sat))
-    return "Setting saturation to {}".format(sat)
+@app.route('/<str:prop>/<int:value>')
+def set_property(prop, value ):
+    if prop not in ['hue', 'bri', 'sat']:
+        abort(400, "property '{}' not recognized".format(prop))
+    min_val = 0
+    max_val = 65535 if prop == 'hue' else 255
+    value = max(min_val, min(max_val, value))
+    bridge.set_light(LIGHT_IDS, prop, value)
+    return "Set {} to {}".format(prop, value)
 
 
 @app.route('/set', methods=['POST'])
 def set():
     # import ipdb; ipdb.set_trace()
-    hue = request.json.get(u'hue') or bridge.get_light(2)['state'].get(u'hue')
-    bri = request.json.get(u'bri') or bridge.get_light(2)['state'].get(u'bri')
-    sat = request.json.get(u'sat') or bridge.get_light(2)['state'].get(u'sat')
+    hue = request.json.get(u'hue') or bridge.get_light(2)[u'state'].get(u'hue')
+    bri = request.json.get(u'bri') or bridge.get_light(2)[u'state'].get(u'bri')
+    sat = request.json.get(u'sat') or bridge.get_light(2)[u'state'].get(u'sat')
 
     try:
         hue = int(hue)
@@ -138,6 +113,7 @@ def guess_color(hue):
     return 'Hue "{}" is closest to "{}"'.format(hue, color)
 
 
+@app.route('/')
 @app.route('/about')
 def about():
     return render_template('about.html')
